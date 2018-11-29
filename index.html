@@ -1,0 +1,265 @@
+<html>
+    <head>
+        <style>
+            html, body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-content: center;
+                width: 100%;
+            }
+            main {
+                margin: auto;
+                width: 80%
+            }
+            p {
+                font-family: monospace;
+                text-align: center;
+            }
+            nav {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-content: center;
+            }
+        </style>
+        <script>
+            class SSNGenerator {
+                constructor() {
+                    this.area = [0, 0, 1]
+                    this.group = [0, 1]
+                    this.serial = [0, 0, 0, 1];
+                    this.generated = 0;
+                }
+                get can_increment() {
+                    return !(this.area[0] === 8 && this.area[1] === 9 && this.area[2] === 9
+                        && this.group[0] === 9 && this.group[1] === 9
+                        && this.serial[0] === 9 && this.serial[1] === 9 && this.serial[2] === 9 && this.serial[3] === 9);
+                }
+
+                get can_decrement() {
+                    return !(this.area[0] === 0 && this.area[1] === 0 && this.area[2] === 1
+                        && this.group[0] === 0 && this.group[1] === 1
+                        && this.serial[0] === 0 && this.serial[1] === 0 && this.serial[2] === 0 && this.serial[3] === 1);
+                }
+
+                get current() {
+                    let [ax, ay, az] = this.area,
+                        [gx, gy] = this.group,
+                        [sx, sy, sz, sw] = this.serial;
+                    return `${ax}${ay}${az}-${gx}${gy}-${sx}${sy}${sz}${sw}`
+                }
+
+                increment_serial() {
+                    for (let i = 3; i >= 0 && this.can_increment; i--) {
+                        this.serial[i] += 1;
+                        if (this.serial[i] > 9) {
+                            this.serial[i] = 0;
+                            if (i === 0) {
+                                for (let i = 1; i >= 0; i--) {
+                                    this.group[i] += 1;
+                                    if (this.group[i] > 9) {
+                                        this.group[i] = 0;
+                                        if (i === 0) {
+                                            if (this.area[0] === 8 && this.area[1] === 9 && this.area[2] === 9) {
+                                                return;
+                                            }
+                                            for (let i = 2; i >= 0; i--) {
+                                                this.area[i] += 1;
+                                                if (this.area[i] > 9) {
+                                                    this.area[i] = 0;
+                                                } else {
+                                                    break;
+                                                }
+                                            }
+                                            if (this.area[0] === 6 && this.area[1] === 6 && this.area[2] === 6) {
+                                                this.area[2] += 1;
+                                            }
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                } 
+                                if (this.group[0] == 0 && this.group[1] == 0) {
+                                    this.group[1] = 1;
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    if (this.serial[0] === 0 && this.serial[1] === 0 && this.serial[2] === 0 && this.serial[3] === 0) {
+                        this.serial[3] = 1;
+                    }
+                }
+
+                decrement_serial() {
+                    for (let i = 3; i >= 0 && this.can_decrement; i--) {
+                        this.serial[i] -= 1;
+                        if (this.serial[0] === 0 && this.serial[1] === 0 && this.serial[2] === 0 && this.serial[3] === 0) {
+                            this.serial = [9, 9, 9, 9];
+                            for (let i = 1; i >= 0; i--) {
+                                this.group[i] -= 1;
+                                if (this.group[0] == 0 && this.group[1] == 0) {
+                                    this.group = [9, 9];
+                                    for (let i = 2; i >= 0; i--) {
+                                        this.area[i] -= 1;
+                                        if (this.area[i] < 0) {
+                                            this.area[i] = 9;
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    if (this.area[0] === 6 && this.area[1] === 6 && this.area[2] === 6) {
+                                        this.area[2] -= 1;
+                                    }
+                                    break;
+                                } else if (this.group[i] < 0) {
+                                    this.group[i] = 9;
+                                    if (i === 0) {
+                                        for (let i = 2; i >= 0; i--) {
+                                            this.area[i] -= 1;
+                                            if (this.area[i] < 0) {
+                                                this.area[i] = 9;
+                                            } else {
+                                                break;
+                                            }
+                                            if (this.area[0] === 6 && this.area[1] === 6 && this.area[2] === 6) {
+                                                this.area[2] -= 1;
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            break;
+                        } else if (this.serial[i] < 0) {
+                            this.serial[i] = 9;
+                            if (i === 0) {
+                                for (let i = 1; i >= 0; i--) {
+                                    this.group[i] -= 1;
+                                    if (this.group[0] == 0 && this.group[1] == 0) {
+                                        this.group = [9, 9];
+                                        for (let i = 2; i >= 0; i--) {
+                                            this.area[i] -= 1;
+                                            if (this.area[i] < 0) {
+                                                this.area[i] = 9;
+                                            } else {
+                                                break;
+                                            }
+                                        }
+                                        if (this.area[0] === 6 && this.area[1] === 6 && this.area[2] === 6) {
+                                            this.area[2] -= 1;
+                                        }
+                                        break;
+                                    } else if (this.group[i] < 0) {
+                                        this.group[i] = 9;
+                                        if (i === 0) {
+                                            for (let i = 2; i >= 0; i--) {
+                                                this.area[i] -= 1;
+                                                if (this.area[i] < 0) {
+                                                    this.area[i] = 9;
+                                                } else {
+                                                    break;
+                                                }
+                                            }
+                                            if (this.area[0] === 6 && this.area[1] === 6 && this.area[2] === 6) {
+                                                this.area[2] -= 1;
+                                            }
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                }
+
+                next() {
+                    let ssn = `${this.area[0]}${this.area[1]}${this.area[2]}-${this.group[0]}${this.group[1]}-${this.serial[0]}${this.serial[1]}${this.serial[2]}${this.serial[3]}`;
+                    this.increment_serial();
+                    return ssn;
+                }   
+
+                previous() {
+                    let ssn = `${this.area[0]}${this.area[1]}${this.area[2]}-${this.group[0]}${this.group[1]}-${this.serial[0]}${this.serial[1]}${this.serial[2]}${this.serial[3]}`;
+                    this.decrement_serial();
+                    return ssn;
+                }
+
+                skip(count = 1) {
+                    for (let i = 0; i < count && this.can_increment; i++) {
+                        this.increment_serial();
+                    }
+                }
+
+                rewind(count = 1) {
+                    for (let i = 0; i < count && this.can_decrement; i++) {
+                        this.decrement_serial();
+                    }
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <main id='main'>
+            <nav>
+                <button type='button' onclick='ssn_generator.rewind(9900 * 9999 + max); next();'>Previous 100 Area Numbers</button>
+                <button type='button' onclick='ssn_generator.rewind(990 * 9999 + max); next();'>Previous 10 Area Numbers</button>
+                <button type='button' onclick='ssn_generator.rewind(99 * 9999 + max); next();'>Previous Area Number</button>
+                <button type='button' onclick='prev()'>Previous 30 Group Numbers</button>
+                <button type='button' onclick='next()'>Next 30 Group Numbers</button>
+                <button type='button' onclick='ssn_generator.skip(99 * 9999 - max); next();'>Next Area Number</button>
+                <button type='button' onclick='ssn_generator.skip(990 * 9999 - max); next();'>Next 10 Area Numbers</button>
+                <button type='button' onclick='ssn_generator.skip(9900 * 9999 - max); next();'>Next 100 Area Numbers</button>
+            </nav>
+            <div>
+                <p id='SSNs'></p>
+            </div>
+            <nav>
+                <button type='button' onclick='ssn_generator.rewind(9900 * 9999 + max); next();'>Previous 100 Area Numbers</button>
+                <button type='button' onclick='ssn_generator.rewind(990 * 9999 + max); next();'>Previous 10 Area Numbers</button>
+                <button type='button' onclick='ssn_generator.rewind(99 * 9999 + max); next();'>Previous Area Number</button>
+                <button type='button' onclick='prev()'>Previous 30 Group Numbers</button>
+                <button type='button' onclick='next()'>Next 30 Group Numbers</button>
+                <button type='button' onclick='ssn_generator.skip(99 * 9999 - max); next();'>Next Area Number</button>
+                <button type='button' onclick='ssn_generator.skip(990 * 9999 - max); next();'>Next 10 Area Numbers</button>
+                <button type='button' onclick='ssn_generator.skip(9900 * 9999 - max); next();'>Next 100 Area Numbers</button>
+            </nav>
+        </main>
+        <script>
+                let ssn_generator = new SSNGenerator();
+                let div = document.getElementById('SSNs');
+                let count = 0;
+                let max = 299970;
+                let ssns = [];
+                for (let i = 0; i < max; i++) {
+                    ssns.push(`${ssn_generator.next()}`);
+                }
+                div.innerText += ssns.join(' ');
+                let prev = () => {
+                    div.innerText = ""; 
+                    ssn_generator.rewind(max * 2);
+                    let ssns = [];
+                    for (let i = 0; i < max; i++) {
+                        ssns.push(`${ssn_generator.next()}`);
+                    }
+                    div.innerText += ssns.join(' ');
+                }
+                let next = () => {
+                    div.innerText = "";
+                    count = 0;
+                    let ssns = [];
+                    for (let i = 0; i < max; i++) {
+                        ssns.push(`${ssn_generator.next()}`);
+                    }
+                    div.innerText += ssns.join(' ');
+                }
+            </script>
+    </body>
+</html>
