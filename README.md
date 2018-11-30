@@ -1,5 +1,6 @@
 # Valid SSN Browser
-Micro website for browsing all valid Social Security Numbers in the United States
+Micro website for browsing all valid Social Security Numbers in the United States.    
+View it live [here](https://capital-ex.github.io/Valid-SSN-Browser/)
 
 ---
 All valid SSNs can be described as followed:
